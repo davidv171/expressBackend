@@ -1,6 +1,8 @@
+var user = require('../models/User.js');
 module.exports=function(app){
-    app.post('/api/signup',function(req,res){
-        
+    app.post('/api/signup',async function(req,res){
+        var test = await user.testConnection();
+        console.log(test);
     });
     app.post('/api/login',function(req,res){
     
