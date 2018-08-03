@@ -1,0 +1,32 @@
+{
+  "name": "povioexpressrewrite",
+  "version": "1.0.0",
+  "description": "A complete rewrite of povioNode using Express instead of Sails",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/davidv171/povioExpressRewrite.git"
+  },
+  "keywords": [
+    "express",
+    "social",
+    "media",
+    "ndoe"
+  ],
+  "author": "davidv171",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/davidv171/povioExpressRewrite/issues"
+  },
+  "homepage": "https://gitlab.com/davidv171/povioExpressRewrite#README",
+  "dependencies": {
+    "bcrypt": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "express-jwt": "^5.3.1",
+    "pg": "^7.4.3"
+  }
+}
