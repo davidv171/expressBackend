@@ -10,10 +10,8 @@ const db        = {}
 var opts = {
     define:{
         //We query the table "user" with no timestamps except updatedAt(legacy database)
-        timestamps: true,
-        createdAt: false,
-        deletedAt: false,
-        freezeTableName:true
+        timestamps: false,
+        freezeTableName:true,
     }
 }
 

@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 module.exports=(sequelize,DataTypes) =>{
     const user = sequelize.define('user',
         {
@@ -24,7 +25,7 @@ module.exports=(sequelize,DataTypes) =>{
             likedByCount:
             {
                 type: DataTypes.INTEGER,
-                defaultsTo:0
+                defaultValue:0
             }
         });
     user.associate = function(models)
@@ -37,4 +38,13 @@ module.exports=(sequelize,DataTypes) =>{
     return user;
         
     
+
+    User.beforeCreate((user, options) => {
+        return bcrypt.hash(user.password, 10)
+            .then(function(err,hash)
+                {
+            user.password = hash;
+                }) 
+      // Store hash in database
+    });
 };
