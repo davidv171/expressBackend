@@ -9,7 +9,6 @@ module.exports=(sequelize,DataTypes) =>{
                 autoIncrement: true,
                 required: true
             },
-            createdAt:false,
             username:
             {
                 type: DataTypes.STRING,
