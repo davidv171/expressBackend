@@ -11,7 +11,7 @@ var opts = {
     define:{
         //We query the table "user" with no timestamps except updatedAt(legacy database)
         timestamps: false,
-        freezeTableName:true,
+        freezeTableName:true
     }
 }
 
