@@ -1,35 +1,36 @@
 var models = require("../models/index.js");
 module.exports=function(app){
 	app.post("/api/signup",async function(req,res){
-        await models.user.create(
-            {
-                username:req.body.username,
-                password:req.body.password
-            })
+		await models.user.create(
+			{
+				username:req.body.username,
+				password:req.body.password
+			})
 			.then(function(user){
 				res.status(200).json(
-                    {
-                        status:"success",
-                        result:user
-                    });
+					{
+						status:"success",
+						result:user
+					});
 			}).catch((err) => res.status(500).json({err:err})); 
 	});
 	app.post("/api/login",async function(req,res){
-        const target_username = req.body.username;
-        const target_pass = req.body.password;
-        models.user.findOne({where:{username:target_username}})
+		const target_username = req.body.username;
+		const target_pass = req.body.password;
+		//Find the user with the username in the request,check the password in the request with the hashed password using bcrypt
+		models.user.findOne({where:{username:target_username}})
 			.then(function(user){
-			const bcrypt = require("bcrypt");
-			bcrypt.compare(target_pass,user.password,function(err,result){
-				console.log("res"+result);
-				if(result){res.status(200).json({succ:"succ"})};
-				if(!result){res.status(400).json({err:"err"})};
-			});			
-	//TODO: Fix up the error handling
+				const bcrypt = require("bcrypt");
+				//TODO: Better responses for success and error 
+				bcrypt.compare(target_pass,user.password,function(err,result){
+					if(result){res.status(200).json({succ:"succ"});}
+					if(!result){res.status(400).json({err:"err"});}
+				});			
+				//TODO: Fix up the error handling
 			}).catch((err) => res.status(500).json({err:err}));
         
 	
-    });
+	});
 	app.get("/api/me",function(req,res){
     
 	});
