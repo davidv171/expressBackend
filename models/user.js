@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 module.exports=(sequelize,DataTypes) =>{
     const user = sequelize.define('user',
         {
@@ -9,25 +10,26 @@ module.exports=(sequelize,DataTypes) =>{
                 autoIncrement: true,
                 required: true
             },
-            createdAt:false,
             username:
             {
                 type: DataTypes.STRING,
                 unique: true,
-                required:true
+                required:true,
+		validate:{len: [4,32]}
             },
             password:{
                 type: DataTypes.STRING,
                 required:true,
-                protect:true
-                
+                protect:true,
+		validate:{len: [4,32]}
+ 
             },
             likedByCount:
             {
                 type: DataTypes.INTEGER,
-                defaultsTo:0
+                defaultValue:0
             }
-        });i
+        });
     user.associate = function(models)
     {
         models.user.hasMany(models.like,
@@ -40,7 +42,7 @@ module.exports=(sequelize,DataTypes) =>{
 			user.password = hashedPw;
 		});
 	});
-
+    
     return user;
         
     

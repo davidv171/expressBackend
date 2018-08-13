@@ -9,9 +9,14 @@ const db        = {}
 //To prevent queries into USERS instead of User(which is what we want)
 var opts = {
     define:{
-        //We query the table "user" with no timestamps except updatedAt(legacy database)
         timestamps: false,
-        freezeTableName:true
+        freezeTableName:true,
+	defaultScope: {
+	    attributes: 
+		{ 
+		    exclude: ['password'] 
+		}	
+	}
     }
 }
 
