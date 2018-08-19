@@ -1,4 +1,11 @@
 module.exports = (sequelize,DataTypes) =>{
+    sequelize 
+    .sync()
+    .then(function(err) {
+        console.log('It worked!');
+      }, function (err) { 
+             console.log('An error occurred while creating the table:', err);
+      });
     const like = sequelize.define('like',
         {
             id:{
@@ -30,6 +37,7 @@ module.exports = (sequelize,DataTypes) =>{
                 }
             });
     };
+
 
     return like;
 
