@@ -11,6 +11,15 @@ var opts = {
     define:{
         timestamps: false,
         freezeTableName:true,
+	//A scope for checking login, which needs to return password to check password validity
+
+	scopes:{
+	    allScope:{
+		attributes:{
+		    include: ['password']
+		}
+	    }
+	},
 	defaultScope: {
 	    attributes: 
 		{ 

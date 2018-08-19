@@ -26,10 +26,11 @@ module.exports = (sequelize,DataTypes) =>{
         models.like.belongsTo(models.user,
             {
                 foreignKey:{
-                    alowNull: false
+                    allowNull: false
                 }
             });
     };
+
     return like;
 
 };
