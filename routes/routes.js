@@ -149,6 +149,7 @@ module.exports = function (app) {
 		//TODO: Add username -> id and the other way logic
 		const source_id = req.decoded.id;
 		const source_username = req.decoded.username;
+		console.log("Source" + source_id);
 		if (target_id === source_id) {
 			res.status(400).json({
 				err: "Cant like yourself"
@@ -157,7 +158,6 @@ module.exports = function (app) {
 		models.like.findOrCreate({
 			where: {
 				target: target_id,
-
 				userId: source_id
 			},
 			defaults: {
@@ -169,8 +169,6 @@ module.exports = function (app) {
 			//Result is an array of size 2,
 			// first element is the found element second element is true or false, based on if  a new row was created or not
 		}).then(function (result) {
-			console.log("ffs" + result[0]);
-			console.log("xd" + result[1]);
 			if (result[1] = false) {
 				res.status(400).json({
 					err: "Already liked"
@@ -186,8 +184,42 @@ module.exports = function (app) {
 			err: err.message
 		}));
 	});
+	//Opposite logic to liking
 	app.get("/api/user/:id/unlike", function (req, res) {
+		const target_id = req.params.id;
+		const target_username = req.params.username;
+		//TODO: Add username -> id and the other way logic
+		const source_id = req.decoded.id;
+		const source_username = req.decoded.username;
 
+		if (target_id === source_id) {
+			res.status(400).json({
+				err: "Cant like yourself"
+			})
+		};
+		models.like.destroy({
+			where: {
+				target: target_id,
+				userId: source_id
+			}
+		}).then(function (result) {
+			console.log("Deletion result" + result);
+			if (result === 1) {
+				res.status(200).json({
+					succ: "success"
+				});
+			}
+			if (result === 0) {
+				res.status(401).json({
+					err: "Already unliked"
+				});
+			}
+			res.status(500).json({
+				succ: result
+			});
+		}).catch((err) => res.status(500).json({
+			err: err.message
+		}));
 	});
 	app.get("*", function (req, res) {
 		res.status(404).json({
