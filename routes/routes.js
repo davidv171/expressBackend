@@ -97,7 +97,7 @@ module.exports = function (app) {
 
 	});
 	//Is authenticated middleware, checks for correct jwt 
-	app.use(function (req, res, next) {
+	app.use("/api/", function (req, res, next) {
 		var token = req.body.token || req.headers.token;
 		if (token) {
 			jwt.verify(token, "S€cr€7", function (err, decoded) {
@@ -124,7 +124,7 @@ module.exports = function (app) {
 		});
 	});
 
-	app.put("/api/me/update-password", async function (req, res) {
+	app.post("/api/me/update-password", async function (req, res) {
 		const newpass = req.body.password;
 		const decoded = req.decoded;
 		models.user.update({
@@ -135,21 +135,56 @@ module.exports = function (app) {
 			},
 			individualHooks: true
 		}).then(function (user) {
-			user = user.reload();
-			res.status(200).json(user);
+			res.status(200).json({
+				succ: "succ",
+				result: user
+			});
 		}).catch((err) => res.status(500).json({
 			err: err.message
 		}));
 	});
+	//TODO: Check if it's an id or a username that's in the request
+	app.use('/api/user/:id', function (req, res, next) {
+		console.log("Here");
+		if (isNaN(req.params.id)) {
+			models.user.findOne({
+				where: {
+					username: req.params.id
+				}
+			}).then(function (user) {
+				res.locals.username = req.params.id;
+				res.locals.id = user.id;
+				console.log("Here");
+				next();
+			}).catch((err) => res.status(400).json({
+				err: err.message
+			}));
+		}
+		if (!isNaN(req.params.id)) {
+			models.user.findById(req.params.id)
+				.then(function (user) {
+					console.log("Username to be set" + user.username);
+					res.locals.username = user.username;
+					res.locals.id = req.params.id;
+					next();
+				}).catch((err) => res.status(400).json({
+					err: err.message
+				}));
+		}
+
+
+	});
 	//Every time a user gets liked create a new Like entry, remove an existing entry when a 
+
 	app.get("/api/user/:id/like", async function (req, res) {
 		//FIXME: if user gets deleted, he can still make requests with a JWT
-		const target_id = req.params.id;
-		const target_username = req.params.username;
+
+		const target_id = res.locals.id;
+		const target_username = res.locals.username;
+		console.log("Target" + target_username);
 		//TODO: Add username -> id and the other way logic
 		const source_id = req.decoded.id;
 		const source_username = req.decoded.username;
-		console.log("Source" + source_id);
 		if (target_id === source_id) {
 			res.status(400).json({
 				err: "Cant like yourself"
@@ -169,29 +204,29 @@ module.exports = function (app) {
 			//Result is an array of size 2,
 			// first element is the found element second element is true or false, based on if  a new row was created or not
 		}).then(function (result) {
-			if (result[1] = false) {
+			if (!result[1]) {
 				res.status(400).json({
 					err: "Already liked"
 				})
 			};
-			if (result[1] = true) {
+			if (result[1]) {
 				res.status(200).json({
 					status: "succ",
 					result: result[0]
 				})
+
 			};
 		}).catch((err) => res.status(500).json({
 			err: err.message
 		}));
+
 	});
 	//Opposite logic to liking
-	app.get("/api/user/:id/unlike", function (req, res) {
-		const target_id = req.params.id;
-		const target_username = req.params.username;
+	app.get("/api/user/:id/unlike", async function (req, res) {
+		//FIXME: if user gets deleted, he can still make requests with a JWT
+		const target_id = res.locals.id;
 		//TODO: Add username -> id and the other way logic
 		const source_id = req.decoded.id;
-		const source_username = req.decoded.username;
-
 		if (target_id === source_id) {
 			res.status(400).json({
 				err: "Cant like yourself"
@@ -214,9 +249,6 @@ module.exports = function (app) {
 					err: "Already unliked"
 				});
 			}
-			res.status(500).json({
-				succ: result
-			});
 		}).catch((err) => res.status(500).json({
 			err: err.message
 		}));
