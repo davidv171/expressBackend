@@ -38,14 +38,19 @@ module.exports = (sequelize, DataTypes) => {
     ""
     //Update the field likedByCount of target user by +1, update the field likes of source user by 1
     like.afterCreate((like) => {
-        console.log(moduleFile);
-        const target_id = like.target_id;
-        
-        moduleFile.user.findById(target_id).then(user => {
-             user.increment('likedByCount', {
-                by: 1
-            })
-        }).catch((err)=>console.log("Decrement error" + err.message));
+        //Because Sequelize Increment seems to have an issue, we resort to writing the SQL sentence by hand. 
+        sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ 1 WHERE "id"=' + like.target)
+            .then((data) => console.log("Updated"))
+            .catch((err) => console.log("error" + err.message));
+
+    });
+    like.afterDelete((like) => {
+        //TODO: Change with update:
+        //someModel.update( { clicks : sequelize.literal( "clicks + 1" ) } ) )
+
+        sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ -1 WHERE "id"=' + like.target)
+            .then((data) => console.log("Updated"))
+            .catch((err) => console.log("error" + err.message));
     });
 
 

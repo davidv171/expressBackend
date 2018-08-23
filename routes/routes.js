@@ -133,6 +133,7 @@ module.exports = function (app) {
 			where: {
 				id: decoded.id
 			},
+			//Trying not to return the password
 			individualHooks: true
 		}).then(function (user) {
 			res.status(200).json({
@@ -214,6 +215,8 @@ module.exports = function (app) {
 					status: "succ",
 					result: result[0]
 				})
+				//Increment the likedByCount value by 1 each time there's a successful like
+				//FIXME: Sequelize not doing what its told to do
 
 			};
 		}).catch((err) => res.status(500).json({
@@ -223,7 +226,6 @@ module.exports = function (app) {
 	});
 	//Opposite logic to liking
 	app.get("/api/user/:id/unlike", async function (req, res) {
-		//FIXME: if user gets deleted, he can still make requests with a JWT
 		const target_id = res.locals.id;
 		//TODO: Add username -> id and the other way logic
 		const source_id = req.decoded.id;
@@ -238,11 +240,11 @@ module.exports = function (app) {
 				userId: source_id
 			}
 		}).then(function (result) {
-			console.log("Deletion result" + result);
 			if (result === 1) {
 				res.status(200).json({
 					succ: "success"
 				});
+
 			}
 			if (result === 0) {
 				res.status(401).json({

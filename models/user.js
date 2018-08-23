@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         }
+
     });
     user.associate = function (models) {
         models.user.hasMany(models.like, {
