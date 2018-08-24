@@ -45,9 +45,8 @@ module.exports = (sequelize, DataTypes) => {
 
     });
     like.afterDelete((like) => {
-        //TODO: Change with update:
+        //TODO: Change with update if you figure out how to import the user model object here:
         //someModel.update( { clicks : sequelize.literal( "clicks + 1" ) } ) )
-
         sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ -1 WHERE "id"=' + like.target)
             .then((data) => console.log("Updated"))
             .catch((err) => console.log("error" + err.message));

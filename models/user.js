@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             required: true,
             protect: true,
+            //Evil regex?
             validate: {
                 len: [4, 32]
             }
