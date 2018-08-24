@@ -150,7 +150,7 @@ module.exports = function (app) {
 			}));
 
 
-	});	
+	});
 	//Authentication middleware, checks for correct jwt on all requests under this function!
 
 	//New authenticated endpoints go after this point
@@ -276,7 +276,7 @@ module.exports = function (app) {
 			};
 		}).catch((err) => res.status(500).json({
 			err: err.message,
-			status: "Unexpected errors"
+			status: "Unexpected error"
 		}));
 
 	});
@@ -300,7 +300,7 @@ module.exports = function (app) {
 			if (result === 1) {
 				res.status(200).json({
 					succ: "success",
-					result:result
+					result: result
 				});
 
 			}
@@ -311,12 +311,14 @@ module.exports = function (app) {
 				});
 			}
 		}).catch((err) => res.status(500).json({
-			err: err.message
+			err: err.message,
+			status: "Unexpected error"
 		}));
 	});
 	app.get("*", function (req, res) {
 		res.status(404).json({
-			status: "Nonexisting request"
+			err:"Nonexisting request",
+			status: "This request "
 		});
 	});
 
