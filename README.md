@@ -57,67 +57,67 @@ What you want to change is :
 ```js
 sequelize = new Sequelize("postgres://popmmtnk:k4p7M5zyk6VhgC_pr8PimC1PFQ4l_nxp@horton.elephantsql.com:5432/popmmtnk",opts)
 ```
-And set up your own database. I'll let you figure that out on your own using Sequelize's ~~awful~~ docs. The rest is up to reading the docs, reading comments and if things get really rough, opening an issue. 
+And set up your own database. I'll let you figure that out on your own using Sequelize's docs. The rest is up to reading the docs, reading comments and if things get really rough, opening an issue. 
 
 Both models are pretty self explanatory because they're not using anything but the basics. Hooks will be explained in the ##REST Endpoints part
 
+## Parsing output
 
+Expected inputs in the API endpoints and their responses are described down below. Status 500 errors are not described. Generally, if you experience a status error with 500, you can't do much about it. The issue is with the server. Look for explanations in the response JSONs as you go. 
 ## REST endpoints:
 
 ### POST /signup
 
 Sign up to the system(username and password). 
-
 #### Request:
-
 POST:
-
 - username: username
 - password: password
 
 ##### Request rules
 
-- Username and password cannot start with a number
-    - response: ```400 {err:'Invalid input',status:'Password or username invalid'}```
 - Username and password must be longer than 4, shorter than 32"
-    - response: ```400 {err:'Invalid input',status:'Password or username invalid'}```
+    - response:
+
+    ```json
+    400 {err:'Invalid input',status: 'Password or username is too short(must be longer than 4 characters, shorter than 32)'}
+    ```
+
 - Username must not already exist in the entry or general error with the database
-    - response: ```500 {err:e.name,info:'An error with the database adapter, user most likely exists'}```
+    - response:
+
+    ```json
+    400 {err: 'Invalid input',status: 'Username already exists!'}
+    ```
 
 Invalid input errors take priority over errors with existing usernames, because the server internally checks the input before querying the database.
 
 ##### Successful output
-
 In case you have successfuly signed up the user, it generates the following response:
-```
+
+```json
 200 {status:'success',result:createdUser}
 ```
 
+createdUser being the user object, which contains the user's id, username and likedByCount(should always be 0!).
 ### POST /login
 
 Log in an existing user with a password
 
 #### POST request body:
-
-
 - username: username
 - password: password
-
 ##### Request rules
-
-- POST body must not be empty
-    - 400 ```{err:'Empty body',info:'POST request body empty'}```
 - User credentials must be correct
-    - 400 ```{err:'Wrong credentials',info:'User with these credentials does not exist'}```
-
+    - 400 ```{err: "Authentication error",status: "Credentials don't exist!"'}```
 ##### Successful output
 
 In case you have successfuly signed in the user, it generates the following response:
 
 200 
-```{status:'Success',token:jwt}```
-  
-
+```json
+{status:'Success',token:jwt}
+```
 
 ### GET /me
 
@@ -137,7 +137,7 @@ Change the logged in user's password.
 
 - password : password
 
-Same rules apply and error outputs apply as during signup.
+Same rules apply and error outputs apply as during sign up.
 
 #### Successful response
 
@@ -150,8 +150,8 @@ Response:
 ``` json
 
 {
-    "status": "success",
-    "updated": "test2"
+    "status": "Success",
+    "updated": true
 }
 
 
@@ -218,7 +218,6 @@ GET Headers:
 {
     "err": "Liking yourself error",
     "status": "You cant like yourself",
-    "code": 1747
 }
 ```
 - You can only like a existing user 

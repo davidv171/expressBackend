@@ -37,19 +37,25 @@ module.exports = (sequelize, DataTypes) => {
     };
     ""
     //Update the field likedByCount of target user by +1, update the field likes of source user by 1
-    like.afterCreate((like) => {
+    like.afterCreate(async (like) => {
         //Because Sequelize Increment seems to have an issue, we resort to writing the SQL sentence by hand. 
-        sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ 1 WHERE "id"=' + like.target)
-            .then((data) => console.log("Updated"))
-            .catch((err) => console.log("error" + err.message));
+        try {
+            user = await sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ 1 WHERE "id"=' + like.target)
+            if (user) console.log("Updated");
+        } catch (err) {
+            console.log("error" + err.message);
+        };
 
     });
     like.afterDelete((like) => {
         //TODO: Change with update if you figure out how to import the user model object here:
-        //someModel.update( { clicks : sequelize.literal( "clicks + 1" ) } ) )
-        sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ -1 WHERE "id"=' + like.target)
-            .then((data) => console.log("Updated"))
-            .catch((err) => console.log("error" + err.message));
+        //someModel.update( { clicks : sequelize.literal( "clicks  -1" ) } ) )
+        try {
+            user = sequelize.query('UPDATE "user" SET "likedByCount"="likedByCount"+ -1 WHERE "id"=' + like.target)
+            if (user) console.log("Updated");
+        } catch (err) {
+            console.log("error" + err.message)
+        };
     });
 
 
