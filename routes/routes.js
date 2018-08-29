@@ -16,14 +16,14 @@ module.exports = (app) => {
 				result: user
 			});
 		} catch (err) {
-			console.log("Error name" + err.name);
+			if(err.name=== "NameError") res.status(400).json({err:"Invalid input",status:"No username and/or password specified"});
 			if (err.name === "SequelizeUniqueConstraintError") res.status(400).json({
 				err: 'Invalid input',
 				status: 'Username already exists!'
 			})
 			if (err.name === "SequelizeValidationError") res.status(400).json({
 				err: 'Invalid input',
-				status: 'Password or username is too short(must be longer than 4 characters, shorter than 32)'
+				status: 'Password or username is too short/long(must be longer than 4 characters, shorter than 32)'
 			});
 			if (err.name === "SequelizeConnectionError") res.status(500).json({
 				err: 'Database error',
@@ -208,13 +208,9 @@ module.exports = (app) => {
 				err: 'Invalid input',
 				status: 'User does not exist, are you using a deleted user token?'
 			})
-			if (err.name === "SequelizeUniqueConstraintError") res.status(400).json({
-				err: 'Invalid input',
-				status: 'Username and password exists'
-			})
 			if (err.name === "SequelizeValidationError") res.status(400).json({
 				err: 'Invalid input',
-				status: 'Password or username is too short(must be longer than 4 characters, shorter than 32)'
+				status: 'Password or username is too short/long(must be longer than 4 characters, shorter than 32)'
 			});
 			if (err.name === "SequelizeConnectionError") res.status(500).json({
 				err: 'Database error',
@@ -231,7 +227,6 @@ module.exports = (app) => {
 
 		const target_id = res.locals.id;
 		const target_username = res.locals.username;
-		console.log("Target" + target_username);
 		//TODO: Add username -> id and the other way logic
 		const source_id = req.decoded.id;
 		const source_username = req.decoded.username;

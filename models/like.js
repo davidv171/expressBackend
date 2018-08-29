@@ -1,7 +1,8 @@
 const moduleFile = require("../models/index.js");
 module.exports = (sequelize, DataTypes) => {
     sequelize
-        .sync()
+        .sync({
+        })
         .then(function (err) {
             console.log('Sync successful');
         }, function (err) {
