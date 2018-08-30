@@ -36,6 +36,7 @@ The major technologies/frameworks/tools used are:
 4. JWT is used to set up authentication, currently has minimal security, only uses a secret.
 5. Bcrypt is used to hash+salt passwords and check logins 
 6. json,body-parser
+7. Supertest for testing(tests.js)
 
 ## How to run the code
 
@@ -175,7 +176,7 @@ Example of a succesful response
 
 200 
 ```json
-    "succ": "Success",
+    "status": "Success",
     "id": 34,
     "username": "david",
     "likedByCount": 0
@@ -200,6 +201,7 @@ Change the logged in user's password.
     "err": "Invalid input",
     "status": "Password or username is too short/long(must be longer than 4 characters, shorter than 32)"
 }
+```
 #### Successful response
 
 Example of a successful call:
@@ -304,8 +306,8 @@ GET Headers:
 
 ```json
 {
-    "err": "Liking yourself error",
-    "status": "You cant like yourself",
+err: "Cant like yourself",
+status: "A user can only like other users, not himself"
 }
 ```
 
@@ -343,7 +345,7 @@ http://127.0.0.1:1337/api/user/1/like would trigger a response:
 ```json
 {
     "status": "Success",
-    "liked":1
+    "liked": "test"
 }
 ```
 "liked": always returns the id of the liked user. 
@@ -395,11 +397,12 @@ status: "A user can only like other users, not himself"
 }
 ```
 #### Successful response
+
 200
 ```json
 {
-    "succ": "Success",
-    "unliked": 5
+    "status": "Success",
+    "unliked": "test"
 }
 ```
 

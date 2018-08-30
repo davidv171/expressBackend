@@ -50,17 +50,16 @@ module.exports = (app) => {
 						status: "There was an error with bcrypt compare"
 					});
 					//We check for actual boolean values, to avoid None result firing an authentication error instead of a bcrypt error
+					//We dont jwt sign IDs for easier testing as the id is the only unknown variable in the response 
 					if (result === true) {
 						var token = jwt.sign({
-								username: user.username,
-								id: user.id,
-								likedByCount: user.likedByCount
+								username: user.username
 							},
 							"S€cr€7", {
 								expiresIn: "7d"
 							});
 						res.status(200).json({
-							succ: "Success",
+							status: "Success",
 							token: token
 						});
 					}
@@ -99,22 +98,27 @@ module.exports = (app) => {
 				}
 			});
 				//Using res.locals to save potential redos of findById
-				res.locals.username = req.params.id;
-				res.locals.id = user.id;
-				res.locals.likedByCount = user.likedByCount;
-				next();
-
+				res.locals.user = user
+				if(!user){
+					res.status(400).json({
+					err: "User doesnt exist",
+					status: "The username or id you've requested does not exist"});
+				}
+				if(user) next();
 		}
 		if (!isNaN(req.params.id)) {
 			user = await models.user.findById(req.params.id)
 					//Using res.locals to save potential redos of findById
-					res.locals.username = user.username;
-					res.locals.id = req.params.id;
-					res.locals.likedByCount = user.likedByCount;
-					next();
+					res.locals.user = user
+					if(!user){
+						res.status(400).json({
+						err: "User doesnt exist",
+						status: "The username or id you've requested does not exist"});}
+					if(user) next();
 				
 		}
-	}catch(err){ res.status(400).json({
+	}catch(err){
+		if (err.name === "TypeError") res.status(400).json({
 		err: "User doesnt exist",
 		status: "The username or id you've requested does not exist"
 	});
@@ -123,11 +127,7 @@ module.exports = (app) => {
 	}});
 	//Don't re-do findOne, because the middleware above takes care of it!
 	app.get("/api/user/:id/", async (req, res) => {
-		res.status(200).json({
-			id: res.locals.id,
-			username: res.locals.username,
-			likedByCount: res.locals.likedByCount
-		});
+		res.status(200).json({user:res.locals.user});
 	});
 	app.get("/api/most-liked", async (req, res) => {
 		try{
@@ -150,19 +150,25 @@ module.exports = (app) => {
 
 	});
 	//Authentication middleware, checks for correct jwt on all requests under this function!
-
+	//Not secure to return stuff just because JWT is correct, but the user might not exist
+	//A hacker might do brute force until he gets a response to crack the secret
 	//New authenticated endpoints go after this point
 	//__________________________________________________________________________________________
-	app.use("/api/", (req, res, next) => {
+	app.use("/api/",  (req, res, next) => {
 		var token = req.body.token || req.headers.token;
 		if (token) {
-			jwt.verify(token, "S€cr€7", (err, decoded) => {
+			jwt.verify(token, "S€cr€7",async (err, decoded) => {
 				if (err) return res.status(403).json({
 					err: "Wrong token",
 					status: "Unverifiable token"
 				});
-				req.decoded = decoded;
-				return next();
+				user = await models.user.findOne({where:{username:decoded.username}});
+				if (user){res.locals.decoded = user; return next();}
+				//Returning the same response to prevent the vulnerability described above this function
+				if (!user) return res.status(403).json({
+					err: "Wrong token",
+					status: "Unverifiable token"
+				});
 			});
 		} else {
 			res.status(403).json({
@@ -174,10 +180,10 @@ module.exports = (app) => {
 	//Authenticated calls
 	app.get("/api/me", async (req, res) => {
 		//TODO: Think if its smart to use JWT for user info instead of querying 
-		var decoded = req.decoded;
+		var decoded = res.locals.decoded;
 		res.status(200).json({
 			//"Success" is printed out for potential future "Parial Success"
-			succ: "Success",
+			status: "Success",
 			id: decoded.id,
 			username: decoded.username,
 			likedByCount: decoded.likedByCount
@@ -186,7 +192,7 @@ module.exports = (app) => {
 
 	app.post("/api/me/update-password", async (req, res) => {
 		const newpass = req.body.password;
-		const decoded = req.decoded;
+		const decoded = res.locals.decoded;
 		//Because upsert doesn't work like we want it to, we use update, and return the first(and only user)
 		try{
 		user = await models.user.update({
@@ -199,7 +205,7 @@ module.exports = (app) => {
 		})
 			//TODO: Clean up output!
 			res.status(200).json({
-				succ: "Success",
+				status: "Success",
 				result: user[0]
 			});
 		}catch(err){
@@ -224,18 +230,18 @@ module.exports = (app) => {
 	//TODO: Think about if like and unlike or authenticated calls belong in a separate file 
 	app.get("/api/user/:id/like", async (req, res) => {
 		//FIXME: if user gets deleted, he can still make requests with a JWT
-
-		const target_id = res.locals.id;
-		const target_username = res.locals.username;
-		//TODO: Add username -> id and the other way logic
-		const source_id = req.decoded.id;
-		const source_username = req.decoded.username;
+		const target_user = res.locals.user
+		const target_id = target_user.id;
+		const target_username = target_user.username;
+		const source_id = res.locals.decoded.id;
+		const source_username = res.locals.decoded.username;
 		if (target_id === source_id) {
 			res.status(400).json({
 				err: "Cant like yourself",
 				status: "A user can only like other users, not himself"
 			})
-		};
+		}
+		else{
 		try{
 		like = await models.like.findOrCreate({
 			where: {
@@ -260,7 +266,7 @@ module.exports = (app) => {
 			if (like[1]) {
 				res.status(200).json({
 					status: "Success",
-					liked: target_id
+					liked: target_username
 				})
 				//Increment the likedByCount value by 1 each time there's a successful like
 			};
@@ -269,19 +275,22 @@ module.exports = (app) => {
 			status: "Unexpected error"
 		})};
 
-	});
+	}});
 	//Opposite logic to liking
 	app.get("/api/user/:id/unlike", async (req, res) => {
-		const target_id = res.locals.id;
+		const target_id = res.locals.user.id;
+		const target_username = res.locals.user.username;
 		//TODO: Add username -> id and the other way logic
-		const source_id = req.decoded.id;
+		const source_id = res.locals.decoded.id;
 		if (target_id === source_id) {
 			res.status(400).json({
 				err: "Cant unlike yourself",
 				status: "A user can only unlike other users, not himself"
-			})
-		};
+				})
+			}
+			else{
 		try{
+
 		like = await models.like.destroy({
 			where: {
 				target: target_id,
@@ -290,26 +299,28 @@ module.exports = (app) => {
 		})
 			if (like === 1) {
 				res.status(200).json({
-					succ: "Success",
-					unliked: target_id
+					status: "Success",
+					unliked: target_username
 				});
 
 			}
 			if (like === 0) {
-				res.status(401).json({
+				res.status(400).json({
 					err: "Already unliked",
 					status: "You already don't like this user"
 				});
 			}
-		}catch(err){res.status(500).json({
+		}catch(err){
+			console.log(err);
+			res.status(500).json({
 			err: err.message,
 			status: "Unexpected error"
 		})}
-	});
+	}});
 	app.get("*", (req, res) => {
 		res.status(404).json({
 			err: "Nonexisting request",
-			status: "This request "
+			status: "This request isnt defined"
 		});
 	});
 
