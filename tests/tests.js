@@ -5,6 +5,13 @@ var routes = require('../routes/routes.js');
 var jwt = require("jsonwebtoken");
 var assert = require('assert');
 var app = express();
+var auth_routes = require('../routes/auth_routes.js');
+
+var translate = require('../middleware/translate.js');
+//Lets us parse request bodies(important for POST)
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(["/api/user/:id/","api/user/:id/like","api/user/:id/unlike"],translate.translate);
 //Generate two random usernames, random1 used for successful signups
 var random1 = Math.random().toString(25).substring(5);
 //random2 is subsequently used as a non-registered user!
@@ -23,6 +30,8 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 routes(app);
+auth_routes(app);
+
 var server = app.listen(4200, async function () {
     console.log("Test server running on" + server.address() + ":" + server.address().port);
     //Wait for 5 seconds to avoid Sequelize sync clashes
@@ -32,7 +41,7 @@ var server = app.listen(4200, async function () {
         try{
             assert.ok(await successfulSignup(),"Successful signup failed");
         if (successfulSignup) {
-            assert.ok(await userAlreadyExists(),"User already exists profile check failed");
+            console.log(assert.ok(await userAlreadyExists(),"User already exists profile check failed"));
             assert.ok(await successfulProfile(),"Successful profile check failed");
             //We need a fully logged in user with none of these because we create a JWT based on the username not based on output
             assert.ok(await successfulLogin(),"Successful login check failed");
@@ -56,8 +65,7 @@ var server = app.listen(4200, async function () {
                 }
             }
         } 
-        assert.ok(mostliked(),"Most liked check failed!");
-        //await mostliked();
+        assert.ok(await mostliked(),"Most liked check failed!");
         assert.ok(await passwordTooShort(),"Password too short check failed!");
         assert.ok(await usernameTooLong(),"Username too long check failed!");
         assert.ok(await falseCredentials(),"False credentials check failed!");
