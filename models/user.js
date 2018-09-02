@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
 			protect: true,
 			//Evil regex?
 			validate: {
-				len: [4, 32]
+				len: [4, 64]
 			}
 
 		},
@@ -38,14 +38,13 @@ module.exports = (sequelize, DataTypes) => {
 		});
 	};
 	user.beforeCreate((user) => {
+		console.log("Hashing on create");
 		return bcrypt.hash(user.password, 10).then(hashedPw => {
-			console.log(user.password + " hash " + hashedPw);
 			user.password = hashedPw;
 		});
 	});
 	user.beforeUpdate((user) => {
 		return bcrypt.hash(user.password, 10).then(hashedPw => {
-			console.log(user.password + " hash " + hashedPw);
 			user.password = hashedPw;
 		});
 

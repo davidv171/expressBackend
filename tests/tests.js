@@ -125,7 +125,7 @@ async function passwordTooShort() {
 		.expect(400)
 		.expect({
 			err: "Invalid input",
-			status: "Password or username is too short/long(must be longer than 4 characters, shorter than 32)"
+			status: "Password or username is too short/long(must be longer than 4 characters, shorter than 64)"
 		});
 
 }
@@ -140,7 +140,7 @@ async function usernameTooLong() {
 		.expect(400)
 		.expect({
 			err: "Invalid input",
-			status: "Password or username is too short/long(must be longer than 4 characters, shorter than 32)"
+			status: "Password or username is too short/long(must be longer than 4 characters, shorter than 64)"
 		});
 
 }
@@ -239,7 +239,6 @@ async function successfulUpdatePassword() {
 		.expect(200)
 		.expect({
 			status: "Success",
-			result: 1
 		});
 }
 async function successfulProfile() {

@@ -23,7 +23,7 @@ module.exports = (app) => {
 			});
 			if (err.name === "SequelizeValidationError") res.status(400).json({
 				err: "Invalid input",
-				status: "Password or username is too short/long(must be longer than 4 characters, shorter than 32)"
+				status: "Password or username is too short/long(must be longer than 4 characters, shorter than 64)"
 			});
 			if (err.name === "SequelizeConnectionError") res.status(500).json({
 				err: "Database error",

@@ -76,7 +76,7 @@ POST:
 
 ##### Request rules
 
-- Username and password must be longer than 4, shorter than 32"
+- Username and password must be longer than 4, shorter than 64 "
     - response:
 
  400
@@ -199,7 +199,7 @@ Change the logged in user's password.
 ```json
 {
     "err": "Invalid input",
-    "status": "Password or username is too short/long(must be longer than 4 characters, shorter than 32)"
+    "status": "Password or username is too short/long(must be longer than 4 characters, shorter than 64)"
 }
 ```
 #### Successful response

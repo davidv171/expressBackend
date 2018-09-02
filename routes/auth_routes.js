@@ -17,30 +17,22 @@ module.exports = (app) => {
 
 	app.post("/api/me/update-password", async (req, res) => {
 		const newpass = req.body.password;
+		user = res.locals.decoded;
 		//Because upsert doesn't work like we want it to, we use update, and return the first(and only user)
 		try{
-			user = await res.locals.decoded.update({
+			user = await user.update({
 				password: newpass
-			}, {
-				where: {
-					id: res.locals.decoded.id
-				},
-			//Trying not to return the password
 			});
-			//TODO: Clean up output!
-			res.status(200).json({
+			if(user){
+			    res.status(200).json({
 				status: "Success",
-				result: user[0]
-			});
+			    });
+			}
 		}catch(err){
-			//Very edge case, but just in case we ever support deleting users or testing on a new database, requests will throw a type error, because user will be null
-			if (err.name === "TypeError") res.status(400).json({
-				err: "Invalid input",
-				status: "User does not exist, are you using a deleted user token?"
-			});
+		    console.log(err);
 			if (err.name === "SequelizeValidationError") res.status(400).json({
 				err: "Invalid input",
-				status: "Password or username is too short/long(must be longer than 4 characters, shorter than 32)"
+				status: "Password or username is too short/long(must be longer than 4 characters, shorter than 64)"
 			});
 			if (err.name === "SequelizeConnectionError") res.status(500).json({
 				err: "Database error",
